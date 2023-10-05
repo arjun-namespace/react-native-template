@@ -4,6 +4,8 @@ import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
+// https://reactnavigation.org/docs/getting-started#installing-dependencies-into-a-bare-react-native-project
+import android.os.Bundle;
 
 public class MainActivity extends ReactActivity {
 
@@ -14,6 +16,12 @@ public class MainActivity extends ReactActivity {
   @Override
   protected String getMainComponentName() {
     return "ProjectName";
+  }
+
+  /** https://reactnavigation.org/docs/getting-started#installing-dependencies-into-a-bare-react-native-project */
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(null);
   }
 
   /**
