@@ -1,5 +1,5 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { combineReducers } from "redux";
+import {configureStore} from '@reduxjs/toolkit';
+import {combineReducers} from 'redux';
 
 import {
   FLUSH,
@@ -10,27 +10,26 @@ import {
   PURGE,
   REGISTER,
   REHYDRATE,
-} from "redux-persist";
+} from 'redux-persist';
 
-import { MMKVStorage } from "src/store/MMKVStorage";
-
+import {MMKVStorage} from 'src/store/MMKVStorage';
 
 const persistanceConfiguration = {
-  key: "root",
-  blacklist: ["navigation"],
+  key: 'root',
+  blacklist: ['navigation'],
   storage: MMKVStorage,
 };
 
 export const rootReducer = combineReducers({
-    // Place reducers in this section
-    // reducerName: reducerComponent,
+  // Place reducers in this section
+  // reducerName: reducerComponent,
 });
 
 const persistedReducer = persistReducer(persistanceConfiguration, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
@@ -42,4 +41,3 @@ export const store = configureStore({
 export const persistor = persistStore(store);
 export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
-

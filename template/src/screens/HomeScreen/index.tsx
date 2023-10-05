@@ -1,6 +1,6 @@
-import React from "react";
-import { Text } from "react-native";
+import React from 'react';
+import {Text} from 'react-native';
 
 export const HomeScreen = () => {
-    return <Text>Welcome Home</Text>
-}
+  return <Text>Welcome Home</Text>;
+};
