@@ -71,3 +71,7 @@ yarn-error.log
 
 # react-native-config codegen
 ios/tmp.xcconfig
+
+# Keystore properties file
+keystore.production.properties
+keystore.staging.properties
