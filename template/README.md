@@ -11,8 +11,10 @@
 - [reduxjs/toolkit](https://redux-toolkit.js.org/introduction/getting-started)
 - [axios](https://axios-http.com/docs/intro)
 - [patch-package](https://github.com/ds300/patch-package)
+- [react-native-svg](https://github.com/software-mansion/react-native-svg)
+- [react-native-svg-transformer](https://github.com/kristerkari/react-native-svg-transformer)
 
-## Step 1: Setup Environments
+## Setup Environments
 The template consist of two environment `staging` and `production`
 
 To run `staging` just use `yarn android` or `yarn ios`
@@ -22,7 +24,7 @@ Create the environment variables files in root directory `.env.staging` and `.en
 
 Also for fastlane environment create fastlane enviromnent variables `.env.fastlane.staging` and `.env.fastlane.production` in root directory
 
-## Step 2: Setup App Signing
+## Setup App Signing
 
 ### iOS
 Since Automatically manage app signing is disable you need to create provision profile manually and add to `/ios` and link from xcode. Try to keep file name for Provision Profile `projectnameStaging.mobileprovision` and `projectnameProduction.mobileprovision` else please update these provision name in `fastlane` `workflow` as well
@@ -40,3 +42,5 @@ KEY_ALIAS           =
 KEY_PASSWORD        = 
 PACKAGE_NAME        = 
 ```
+
+## Project Structure
