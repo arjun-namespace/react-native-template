@@ -6,7 +6,7 @@ import {Icon} from 'src/components/icon';
 export const HomeScreen = () => {
   return (
     <>
-      <Icon name="home" type="outline" />
+      <Icon name="home" />
       <Text style={{color: '#000000'}}>Welcome to {Config.ENV_TEST} App</Text>
     </>
   );

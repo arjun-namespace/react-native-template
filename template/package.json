@@ -18,6 +18,7 @@
     "bundle:analysis": "visualize-bundle -a"
   },
   "dependencies": {
+    "@react-navigation/bottom-tabs": "^6.5.9",
     "@react-navigation/native": "^6.1.8",
     "@react-navigation/native-stack": "^6.9.14",
     "@reduxjs/toolkit": "^1.9.7",
