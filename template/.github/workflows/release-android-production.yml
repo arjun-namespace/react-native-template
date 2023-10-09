@@ -1,0 +1,45 @@
+name: release-android-production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build Android for Production.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Prepare Android Build
+        uses: ./.github/actions/prepare-android-build
+        with:
+          variant: 'production'
+        env:
+          DOT_ENV: '${{ secrets.DOT_ENV_PRODUCTION }}'
+          DOT_ENV_FASTLANE: '${{ secrets.DOT_ENV_FASTLANE_PRODUCTION }}'
+          KEYSTORE: '${{ secrets.KEYSTORE_PRODUCTION }}'
+          KEYSTORE_FILE_NAME: '${{ secrets.KEYSTORE_FILE_NAME_PRODUCTION }}'
+          KEYSTORE_PROPERTIES: '${{ secrets.KEYSTORE_PROPERTIES_PRODUCTION }}'
+          PLAYSTORE_UPLOAD_KEY: '${{ secrets.PLAYSTORE_UPLOAD_KEY_PRODUCTION }}'
+          GOOGLE_SERVICES: '${{ secrets.GOOGLE_SERVICES_PRODUCTION }}'
+
+      # By default Appfile looks for .env file, here we are instructing it to use .env.fastlane.production
+      - name: Deploy app for internal testing
+        run: bundle exec fastlane android deploy_app deploy_type:production --env fastlane.production
+
+  slack-notification:
+    if: ${{ always() }}
+    needs: [build-and-deploy]
+    name: Send Slack Notification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Send Slack Notification
+        uses: ./.github/actions/prepare-slack-notification
+        with:
+          variant: 'production'
+          platform: 'Android'
+          result: ${{ needs.build-and-deploy.result }}
+        env:
+          SLACK_WEBHOOK: '${{ secrets.SLACK_WEBHOOK }}'
+          SLACK_CHANNEL: 'worldtimes-deploy'

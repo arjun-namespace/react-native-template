@@ -1,0 +1,43 @@
+name: release-ios-production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build iOS Production and deploy to TestFlight
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Prepare iOS Build
+        uses: ./.github/actions/prepare-ios-build
+        with:
+          variant: 'production'
+        env:
+          DOT_ENV: '${{ secrets.DOT_ENV_PRODUCTION }}'
+          DOT_ENV_FASTLANE: '${{ secrets.DOT_ENV_FASTLANE_PRODUCTION }}'
+          P12: '${{ secrets.P12_PRODUCTION }}'
+          PROVISION: '${{ secrets.PROVISION_PRODUCTION }}'
+          GOOGLE_PLIST: '${{ secrets.PLIST_PRODUCTION }}'
+
+      - name: Deploy Production app to TestFlight
+        run: bundle exec fastlane ios deploy_app deploy_type:production --env fastlane.production
+
+  slack-notification:
+    if: ${{ always() }}
+    needs: [build-and-deploy]
+    name: Send Slack Notification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Send Slack Notification
+        uses: ./.github/actions/prepare-slack-notification
+        with:
+          variant: 'production'
+          platform: 'iOS'
+          result: ${{ needs.build-and-deploy.result }}
+        env:
+          SLACK_WEBHOOK: '${{ secrets.SLACK_WEBHOOK }}'
+          SLACK_CHANNEL: 'worldtimes-deploy'

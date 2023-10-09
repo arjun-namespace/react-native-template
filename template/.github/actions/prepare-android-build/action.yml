@@ -1,0 +1,23 @@
+name: prepare-android-build
+description: Action to prepare environment for android build
+
+inputs:
+  variant:
+    description: production | staging
+    default: 'staging'
+
+runs:
+  using: composite
+  steps:
+    - name: ci/prepare-mobile-build
+      uses: ./.github/actions/prepare-mobile-build
+
+    - name: Setup Enviroments Variabls
+      shell: bash
+      run: |
+        echo "$DOT_ENV" > .env.${{inputs.variant}}
+        echo "$DOT_ENV_FASTLANE" > .env.fastlane.${{inputs.variant}}
+        echo "$KEYSTORE" | base64 --decode > android/app/$KEYSTORE_FILE_NAME
+        echo "$KEYSTORE_PROPERTIES" > android/keystore.${{ inputs.variant }}.properties
+        echo "$PLAYSTORE_UPLOAD_KEY" | base64 --decode > android/app/key.json
+        echo "$GOOGLE_SERVICES" | base64 --decode > android/app/src/${{ inputs.variant }}/google-services.json

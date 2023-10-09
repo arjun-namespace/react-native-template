@@ -1,0 +1,171 @@
+ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "300"
+ENV["FASTLANE_XCODE_LIST_TIMEOUT"] = "300"
+default_platform(:ios)
+
+## Readme
+platform :ios do
+  desc 'just regenerate fastlane/README.md'
+  lane :readme do
+  end
+
+  ## VERSIONING
+  desc 'Bump up build number - to the next highest integer value'
+  lane :bumpup_build_number do |options|
+    type = options[:type] || 'minor'
+    if type == 'minor' || build == 'major' || build == 'patch'
+      UI.message "Bump up build number for type: #{type}"
+    else
+      UI.user_error! "Invalid build type: #{build}!!! Please use minor, major or patch"
+    end
+    increment_build_number(
+      xcodeproj: "./ios/projectname.xcodeproj"
+    )
+    increment_version_number(
+      bump_type: type, # Automatically increment patch version number
+      xcodeproj: "./ios/projectname.xcodeproj"
+    )
+    commit_version_bump(
+      message: "iOS Version Bump",
+      xcodeproj: "./ios/projectname.xcodeproj"
+    )
+  end
+
+  ## PROVISIONING
+  desc "Import Certificates"
+  private_lane :import_certificates_and_provisioning_profile do |options|
+    create_keychain(
+      name: "mykeychain",
+      password: "password",
+      timeout: 1000
+    )
+    unlock_keychain( # Unlock an existing keychain and add it to the keychain search list
+      path: "mykeychain",
+      password: "password"
+    )
+    import_certificate(
+      certificate_path: options[:deploy_type] == 'production' ? "projectnameProduction.p12" : "projectnameStaging.p12",
+      certificate_password: ENV["P12_PASSWORD"],
+      keychain_name: "mykeychain",
+      keychain_password: "password"
+    )
+    install_provisioning_profile(path: options[:deploy_type] == 'production' ? "projectnameProduction.mobileprovision" : "projectnameStaging.mobileprovision")
+  end
+
+  ## BUILDING   
+  desc 'Build Production ipa file'
+  lane :build_ipa_file do |options|
+    build_app(
+      clean: true,
+      verbose: true,
+      scheme:  options[:deploy_type] == 'production' ? "projectname-production" : "projectname-staging",
+      configuration: 'Release',
+      workspace: 'ios/projectname.xcworkspace',
+      output_directory: "./fastlane/build/#{options[:deploy_type]}",
+      output_name: "projectname.ipa", 
+      include_symbols: true,
+      include_bitcode: true,
+      export_xcargs: "-allowProvisioningUpdates",
+      # Here the provisioning profile name must be same as the one given during provisioning profile creation
+      export_options: {
+        provisioningProfiles: {
+          ENV["APP_IDENTIFIER"] => options[:deploy_type] == 'production' ? "projectnameProduction" : "projectnameStaging",
+        },    
+      }
+    )
+  end
+
+  ## Upload DYSM to Firebase Crashlytics
+  desc 'Upload DYSM to Firebase Crashlytics'
+  lane :'upload_dysm' do |options|
+    UI.message "Uploading dysm to crashlytics for  #{options[:deploy_type]}"
+    gsp_path= "./ios/Firebase/#{options[:deploy_type].capitalize}/GoogleService-Info.plist"
+    UI.message "gsp_path  #{gsp_path}"
+    upload_symbols_to_crashlytics(gsp_path: gsp_path, binary_path: './ios/Pods/FirebaseCrashlytics/upload-symbols')
+    clean_build_artifacts
+  end
+
+  ## DEPLOYING
+  desc "Deploy app to Testflight"
+  lane :deploy_app do |options|
+    deploy_type = options[:deploy_type] || 'staging'
+    
+    if deploy_type == 'production' || deploy_type == 'staging'
+      UI.message "Deploying #{deploy_type} app"
+    else
+      UI.user_error! "Invalid Deploy type: #{deploy_type}!!! Please use production or staging"
+    end
+
+    import_certificates_and_provisioning_profile(deploy_type: deploy_type)
+
+    UI.message "Building #{deploy_type} App"
+    build_ipa_file(deploy_type:deploy_type) 
+    
+    UI.message "Deploying #{deploy_type} App to Testflight"
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      skip_submission: true,
+      apple_id: ENV["APP_APPLE_ID"],
+      ipa: "./fastlane/build/#{deploy_type}/projectname.ipa"
+    )
+    upload_dysm(deploy_type: deploy_type)
+  end
+end
+
+platform :android do
+  ## Readme
+  desc "just regenerate fastlane/README.md"
+  lane :readme do
+  end
+
+  desc 'Generate aab / apk file'
+  lane :build_aab_file do |options|
+    gradle(
+      project_dir: "./android",
+      task: "clean",
+    )
+    gradle(
+      project_dir: "./android",
+      task: options[:build] == 'apk' ? "assemble" : "bundle",
+      flavor: options[:deploy_type],
+      build_type: "Release",
+    )
+  end
+
+  desc "Deploy app to PlayStore"
+  lane :deploy_app do |options|
+
+    deploy_type = options[:deploy_type] || 'staging'
+    play_store_track = options[:track] ||  'internal'
+    file_type = options[:build] || 'aab'
+
+    if deploy_type == 'production' || deploy_type == 'staging'
+      UI.message "Release Type: #{deploy_type} app"
+    else
+      UI.user_error! "Invalid release: #{deploy_type} !!! Please use [production | staging]"
+    end
+
+    if play_store_track == 'alpha' || play_store_track == 'beta' || play_store_track == 'internal'
+      UI.message "Release Track: #{play_store_track}"
+    else
+      UI.user_error! "Invalid track: #{play_store_track} !!! Please use [beta | alpha | internal]"
+    end
+
+    if file_type == 'aab' || file_type == 'apk'
+      UI.message "Generating #{deploy_type} #{file_type}"
+    else
+      UI.user_error! "Invalid Build: #{file_type} !!! Please use [aab | apk]"
+    end
+
+    UI.message "Deploying #{deploy_type} #{file_type} to Playstore track:#{play_store_track}"
+    build_aab_file(deploy_type:deploy_type, track:play_store_track, build:file_type) 
+    upload_to_play_store(
+      track: play_store_track,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      release_status: 'draft'
+    )
+  end
+
+  error do |lane, exception| 
+  end
+end

@@ -1,0 +1,51 @@
+name: prepare-ios-build
+description: Action to prepare environment for ios build
+
+inputs:
+  variant:
+    description: production | staging
+    default: 'staging'
+
+runs:
+  using: composite
+  steps:
+    - name: ci/prepare-mobile-build
+      uses: ./.github/actions/prepare-mobile-build
+
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '14.2'
+
+    - name: Cache Podfile
+      uses: actions/cache@v3
+      with:
+        path: ios/Pods
+        key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
+
+    - name: Pod install
+      shell: bash
+      # https://reactnative.dev/docs/speeding-ci-builds#disable-flipper-for-ios
+      run: NO_FLIPPER=1 pod install --project-directory=ios
+
+    - name: Determine Variant Directory
+      id: directory
+      shell: bash
+      run: |
+        if [ "${{ inputs.variant }}" = "production" ]; then
+          echo "P12_FILE_NAME=ProjectNameProduction.p12" >> $GITHUB_ENV
+          echo "PROVISION_FILE_NAME=ProjectNameProduction.mobileprovision >> $GITHUB_ENV
+        elif [ "${{ inputs.variant }}" = "staging" ]; then
+          echo "P12_FILE_NAME=ProjectNameStaging.p12" >> $GITHUB_ENV
+          echo "PROVISION_FILE_NAME=ProjectNameStaging.mobileprovision" >> $GITHUB_ENV
+        fi
+
+    - name: Setup Enviroments Variabls
+      shell: bash
+      run: |
+        echo "$DOT_ENV" > .env.${{ inputs.variant }}
+        echo "$DOT_ENV_FASTLANE" > .env.fastlane.${{ inputs.variant }}
+        echo "$P12" | base64 --decode >  ${{ env.P12_FILE_NAME }}
+        echo "$PROVISION" | base64 --decode > ${{ env.PROVISION_FILE_NAME }}
+        echo "$GOOGLE_PLIST" | base64 --decode > ios/Firebase/${{ inputs.variant }}/GoogleService-Info.plist

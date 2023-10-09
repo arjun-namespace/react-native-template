@@ -1,0 +1,42 @@
+name: release-ios-staging
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build iOS Staging and deploy to TestFlight
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Prepare iOS Build
+        uses: ./.github/actions/prepare-ios-build
+        with:
+          variant: 'staging'
+        env:
+          DOT_ENV: '${{ secrets.DOT_ENV_STAGING }}'
+          DOT_ENV_FASTLANE: '${{ secrets.DOT_ENV_FASTLANE_STAGING }}'
+          P12: '${{ secrets.P12_STAGING }}'
+          PROVISION: '${{ secrets.PROVISION_STAGING }}'
+          GOOGLE_PLIST: '${{ secrets.PLIST_STAGING }}'
+
+      - name: Deploy Staging app to TestFlight
+        run: bundle exec fastlane ios deploy_app --env fastlane.staging
+
+  slack-notification:
+    if: ${{ always() }}
+    needs: [build-and-deploy]
+    name: Send Slack Notification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Send Slack Notification
+        uses: ./.github/actions/prepare-slack-notification
+        with:
+          variant: 'staging'
+          platform: 'iOS'
+          result: ${{ needs.build-and-deploy.result }}
+        env:
+          SLACK_WEBHOOK: '${{ secrets.SLACK_WEBHOOK }}'
+          SLACK_CHANNEL: 'worldtimes-deploy'

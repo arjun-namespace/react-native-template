@@ -1,0 +1,15 @@
+name: prepare-node-deps
+description: installing node and node modules
+
+runs:
+  using: composite
+  steps:
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.node-version'
+        cache: 'yarn'
+
+    - name: yarn install
+      shell: bash
+      run: yarn 2> >(grep -v warning 1>&2)

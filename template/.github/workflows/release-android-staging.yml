@@ -1,0 +1,45 @@
+name: release-android-staging
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build Android for staging.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Prepare Android Build
+        uses: ./.github/actions/prepare-android-build
+        with:
+          variant: 'staging'
+        env:
+          DOT_ENV: '${{ secrets.DOT_ENV_STAGING }}'
+          DOT_ENV_FASTLANE: '${{ secrets.DOT_ENV_FASTLANE_STAGING }}'
+          KEYSTORE: '${{ secrets.KEYSTORE_STAGING }}'
+          KEYSTORE_FILE_NAME: '${{ secrets.KEYSTORE_FILE_NAME_STAGING }}'
+          KEYSTORE_PROPERTIES: '${{ secrets.KEYSTORE_PROPERTIES_STAGING }}'
+          PLAYSTORE_UPLOAD_KEY: '${{ secrets.PLAYSTORE_UPLOAD_KEY_STAGING }}'
+          GOOGLE_SERVICES: '${{ secrets.GOOGLE_SERVICES_STAGING }}'
+
+      # By default Appfile looks for .env file, here we are instructing it to use .env.fastlane.staging
+      - name: Deploy app for internal testing
+        run: bundle exec fastlane android deploy_app --env fastlane.staging
+
+  slack-notification:
+    if: ${{ always() }}
+    needs: [build-and-deploy]
+    name: Send Slack Notification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Send Slack Notification
+        uses: ./.github/actions/prepare-slack-notification
+        with:
+          variant: 'staging'
+          platform: 'Android'
+          result: ${{ needs.build-and-deploy.result }}
+        env:
+          SLACK_WEBHOOK: '${{ secrets.SLACK_WEBHOOK }}'
+          SLACK_CHANNEL: 'worldtimes-deploy'

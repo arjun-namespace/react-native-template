@@ -1,0 +1,39 @@
+name: Slack Notification
+description: Slack Notification
+
+inputs:
+  variant:
+    description: production | staging
+    default: 'staging'
+  platform:
+    description: iOS | Android
+    default: 'iOS'
+  result:
+    description: success | failed
+    default: 'failed'
+
+runs:
+  using: composite
+  steps:
+    - name: Set ENVs for Slack Notification
+      shell: bash
+      run: |
+        echo "SLACK_WEBHOOK=$SLACK_WEBHOOK" >> $GITHUB_ENV
+        echo "SLACK_CHANNEL=$SLACK_CHANNEL" >> $GITHUB_ENV
+        if [[ ${{ inputs.result }} == success ]]; then
+          echo "SLACK_COLOR=good" >> $GITHUB_ENV
+          echo "SLACK_MESSAGE=${{ inputs.platform }} app deployed to ${{ inputs.variant }}!" >> $GITHUB_ENV
+        else
+          echo "SLACK_COLOR=danger" >> $GITHUB_ENV
+          echo "SLACK_MESSAGE=Failed to deploy ${{ inputs.platform }} app to ${{ inputs.variant }}" >> $GITHUB_ENV
+        fi
+
+    - name: Notify slack on failure
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+        SLACK_CHANNEL: ${{ env.SLACK_CHANNEL }}
+        SLACK_MESSAGE: ${{ env.SLACK_MESSAGE }}
+        SLACK_ICON: ':namespace:'
+        SLACK_USERNAME: 'Deployer'
+        SLACK_COLOR: ${{ env.SLACK_COLOR }}

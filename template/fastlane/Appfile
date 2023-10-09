@@ -1,0 +1,11 @@
+## https://docs.fastlane.tools/best-practices/keys/
+
+## iOS
+app_identifier ENV["APP_IDENTIFIER"]
+apple_id ENV["APPLE_ID"]
+team_id ENV["APPLE_TEAM_ID"]
+itc_team_id ENV["ITC_TEAM_ID"]
+
+## Android
+json_key_file "./android/app/key.json"
+package_name ENV["ANDROID_PACKAGE_NAME"]
