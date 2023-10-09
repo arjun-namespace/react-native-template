@@ -110,7 +110,7 @@ android {
         resValue "string", "build_config_package", "com.projectname"
     }
     signingConfigs {
-        key {
+        debug {
             if (flavorName !== "") {
                 def propertyFileName = 'keystore.' + flavorName + '.properties'
                 def propsFile = rootProject.file(propertyFileName)
@@ -144,13 +144,13 @@ android {
     }
     buildTypes {
         debug {
-            signingConfig signingConfigs.key
+            signingConfig signingConfigs.debug
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             shrinkResources true
-            signingConfig signingConfigs.key
+            signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
