@@ -1,13 +1,13 @@
 import React from 'react';
 import {Text} from 'react-native';
 import Config from 'react-native-config';
-import SampleBell from 'src/assets/icons/SampleBell.svg';
+import {Icon} from 'src/components/icon';
 
 export const HomeScreen = () => {
   return (
     <>
-      <SampleBell height={48} width={48} />
-      <Text style={{color: 'black'}}>Welcome Home {Config.ENV_TEST}</Text>
+      <Icon name="home" type="outline" />
+      <Text style={{color: '#000000'}}>Welcome to {Config.ENV_TEST} App</Text>
     </>
   );
 };
