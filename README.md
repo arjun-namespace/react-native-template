@@ -15,5 +15,5 @@ Assuming you have all the requirements installed, you can run the project by run
     - `yarn android` form **android staging**
     - `yarn android:prod` form **android production**
     - `yarn ios` form **iOS staging**
-    - `yarn ios:prod` form **ios production**
+    - `yarn ios:prod` form **iOS production**
 
