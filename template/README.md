@@ -1,6 +1,6 @@
 # Getting Started
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup)
 
 ## Installed Packages
 - [react-native-config](https://github.com/luggit/react-native-config)
@@ -13,6 +13,7 @@
 - [patch-package](https://github.com/ds300/patch-package)
 - [react-native-svg](https://github.com/software-mansion/react-native-svg)
 - [react-native-svg-transformer](https://github.com/kristerkari/react-native-svg-transformer)
+- [react-native-firebase/app](https://rnfirebase.io/)
 
 ## Setup Environments
 The template consist of two environment `staging` and `production`
@@ -35,12 +36,28 @@ Create `keystore` file for each flavor used in Android as `staging-release.keyst
 
 Also create `properties` file containing each keystore information required for respective keystore file `keystore.staging.propeprties` and `keystore.production.properties` and add these files in `/android/`
 
-```bash
+```bash 
 KEYSTORE_FILE       = 
 KEYSTORE_PASSWORD   = 
 KEY_ALIAS           = 
 KEY_PASSWORD        = 
 PACKAGE_NAME        = 
 ```
+
+## Setup Firebase
+
+### Android
+Add respective `google-services.json` file for respective flavor in its respective directory
+
+For `staging` add `google-services.json` in `/android/src/staging/`
+
+For `production` add `google-services.json` in `/android/src/production/`
+
+### iOS
+Add respective `GoogleService-Info.plist` file for respective scheme in its respective directory
+
+For `staging` add `GoogleService-Info.plist` in `ios/Firebase/staging/`
+
+For `production` add `GoogleService-Info.plist` in `ios/Firebase/production/`
 
 ## Project Structure

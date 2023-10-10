@@ -75,3 +75,7 @@ ios/tmp.xcconfig
 # Keystore properties file
 keystore.production.properties
 keystore.staging.properties
+
+# Firebase 
+google-services.json
+GoogleService-Info.plist
