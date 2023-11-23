@@ -10,5 +10,5 @@
 # Add any project specific keep options here:
 
 # https://github.com/luggit/react-native-config#problems-with-proguard
--keep class com.worldtimes.BuildConfig { *; }
+-keep class com.ProjectName.BuildConfig { *; }
 

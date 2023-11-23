@@ -42,4 +42,4 @@ jobs:
           result: ${{ needs.build-and-deploy.result }}
         env:
           SLACK_WEBHOOK: '${{ secrets.SLACK_WEBHOOK }}'
-          SLACK_CHANNEL: 'worldtimes-deploy'
+          SLACK_CHANNEL: 'ProjectName-deploy'
