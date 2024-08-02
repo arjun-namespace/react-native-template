@@ -126,7 +126,8 @@ platform :android do
     gradle(
       project_dir: "./android",
       task: options[:build] == 'apk' ? "assemble" : "bundle",
-      flavor: options[:deploy_type],
+      # Should be bundleProductionRelease or bundleStagingRelease
+      flavor: options[:deploy_type].capitalize,
       build_type: "Release",
     )
   end
