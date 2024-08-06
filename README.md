@@ -5,7 +5,7 @@
 To create a new project using the boilerplate simply run :
 
 ```
-npx react-native@latest init MyApp --template https://github.com/arjun-namespace/react-native-template.git
+npx @react-native-community/cli@latest init MyApp --template https://github.com/arjun-namespace/react-native-template.git
 ```
 
 Assuming you have all the requirements installed, you can run the project by running:

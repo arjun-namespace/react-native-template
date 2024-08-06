@@ -21,7 +21,7 @@
   return [self bundleURL];
 }
  
-- (NSURL *)bundleURLs
+- (NSURL *)bundleURL
 {
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
